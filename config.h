@@ -1,7 +1,7 @@
 #pragma once
 
 // Data Size
-#define SIZE_N 256
+#define SIZE_N 8192
 
 // CUDA Configuration
 // Block (x * y * z) = number of threads
@@ -16,8 +16,5 @@
 #define GRID_Z 1 // shouldn't exceed 65535 for CUDA compute capability 5.x and above
 #define BLOCKS_PER_GRID (GRID_X * GRID_Y * GRID_Z) // shouldn't exceed 2^31 - 1 for CUDA compute capability 5.x and above
 
-// Shared Memory
-#define SHARED_MEMORY 0 // default
-
 // Use cuBLAS
-#define CUBLAS_ENABLE 0
+#define CUBLAS_ENABLE 1
