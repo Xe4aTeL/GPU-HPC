@@ -14,50 +14,48 @@ Programmed by:
 Skorobagatko Ivan ІО-13
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 
+#include "file_handler.h"
 #include "gpu_kernel.cuh"
 #include "cpu_math.h"
-#include "file_handler.h"
 #include "config.h"
 
 
 void fill_matrix(int* matrix, int N);
 void print_matrix_result(int* matrix, int N);
-void cpu_mode();
-void gpu_mode();
+void cpu_mode(int SIZE_N);
+void gpu_mode(int SIZE_N);
 
 int main(int argc, char* argv[]) {
     // Check if the program is run with the correct number of arguments
-    if (argc != 2) {
-        printf("Usage: %s <GPU_ENABLE>\n", argv[0]);
-        return -1;
+    if (argc != 3) {
+        printf("Usage: <GPU_ENABLE> <SIZE>\n");
+        exit(EXIT_FAILURE);
     }
 
     // Parse GPU_ENABLE from command line argument
     int GPU_ENABLE = atoi(argv[1]);
 
+    // Parse SIZE_N from command line argument
+    int SIZE_N = atoi(argv[2]);
+
     // Check if GPU_ENABLE is valid
     if (GPU_ENABLE != 0 && GPU_ENABLE != 1) {
         printf("Error: GPU_ENABLE must be 0 or 1\n");
-        return -1;
+        exit(EXIT_FAILURE);
     }
-
-    // Variables
-
 
     // CPU mode memory allocation
     if (GPU_ENABLE == 0)
-        cpu_mode();
+        cpu_mode(SIZE_N);
 
     // GPU mode memory allocation
     if (GPU_ENABLE == 1)
-        gpu_mode();
+        gpu_mode(SIZE_N);
 
     printf("Done\n");
-    return 0;
+    exit(EXIT_SUCCESS);
 }
 
 void fill_matrix(int* matrix, int N) {
@@ -81,7 +79,7 @@ void print_matrix_result(int* matrix, int N) {
     printf("\n");
 }
 
-void cpu_mode() {
+void cpu_mode(int SIZE_N) {
     printf("CPU mode\n");
     // Variable, timespec for time measurement
     int *MA, *MB, *MC, *ME;
@@ -93,20 +91,20 @@ void cpu_mode() {
     MA = (int*)malloc(matrix_size);
     if (MA == NULL) {
         printf("Error allocating memory for MA\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     MB = (int*)malloc(matrix_size);
     if (MB == NULL) {
         printf("Error allocating memory for MB\n");
         free(MA);
-        return;
+        exit(EXIT_FAILURE);
     }
     MC = (int*)malloc(matrix_size);
     if (MC == NULL) {
         printf("Error allocating memory for MC\n");
         free(MA);
         free(MB);
-        return;
+        exit(EXIT_FAILURE);
     }
     ME = (int*)malloc(matrix_size);
     if (ME == NULL) {
@@ -114,17 +112,64 @@ void cpu_mode() {
         free(MA);
         free(MB);
         free(MC);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     // Fill MA
     fill_matrix(MA, SIZE_N);
 
     // Read data from files
-    read_matrix_int("data\\8192_MB_i.txt", MB, SIZE_N, SIZE_N);
-    read_matrix_int("data\\8192_MC_i.txt", MC, SIZE_N, SIZE_N);
-    read_matrix_int("data\\8192_ME_i.txt", ME, SIZE_N, SIZE_N);
-    read_scalar_int("data\\d_i.txt", &d);
+    switch (SIZE_N) {
+        case 256:
+            read_matrix_int("data\\256_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\256_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\256_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 512:
+            read_matrix_int("data\\512_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\512_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\512_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 1024:
+            read_matrix_int("data\\1024_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\1024_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\1024_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 2048:
+            read_matrix_int("data\\2048_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\2048_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\2048_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 4096:
+            read_matrix_int("data\\4096_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\4096_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\4096_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 8192:
+            read_matrix_int("data\\8192_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\8192_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\8192_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 16384:
+            read_matrix_int("data\\16384_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\16384_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\16384_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        default:
+            printf("Unusual size of input data, reading MB_i.txt, MC_i.txt, ME_i.txt");
+            read_matrix_int("data\\MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+    }
 
     // Start timer
     timespec_get(&start, TIME_UTC);
@@ -151,7 +196,7 @@ void cpu_mode() {
     free(ME);
 }
 
-void gpu_mode() {
+void gpu_mode(int SIZE_N) {
     // Configuration checks
     if (THREADS_PER_BLOCK > 1024) {
         printf("Error: THREADS_PER_BLOCK exceeds 1024\n");
@@ -175,44 +220,91 @@ void gpu_mode() {
     err = cudaEventCreate(&start);
     if (err != cudaSuccess) {
         printf("Error creating event for timing.");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaEventCreate(&stop);
     if (err != cudaSuccess) {
         printf("Error creating event for timing.");
-        return;
+        exit(EXIT_FAILURE);
     }
 
     // Allocate memory (Host)
     err = cudaMallocHost((void**)&MA, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for MA\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMallocHost((void**)&MB, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for MB\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMallocHost((void**)&MC, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for MC\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMallocHost((void**)&ME, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for ME\n");
-        return;
+        exit(EXIT_FAILURE);
     }
 
     // Fill MA
     fill_matrix(MA, SIZE_N);
 
     // Read data from files
-    read_matrix_int("data\\8192_MB_i.txt", MB, SIZE_N, SIZE_N);
-    read_matrix_int("data\\8192_MC_i.txt", MC, SIZE_N, SIZE_N);
-    read_matrix_int("data\\8192_ME_i.txt", ME, SIZE_N, SIZE_N);
-    read_scalar_int("data\\d_i.txt", &d);
+    switch (SIZE_N) {
+        case 256:
+            read_matrix_int("data\\256_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\256_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\256_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 512:
+            read_matrix_int("data\\512_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\512_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\512_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 1024:
+            read_matrix_int("data\\1024_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\1024_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\1024_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 2048:
+            read_matrix_int("data\\2048_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\2048_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\2048_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 4096:
+            read_matrix_int("data\\4096_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\4096_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\4096_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 8192:
+            read_matrix_int("data\\8192_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\8192_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\8192_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        case 16384:
+            read_matrix_int("data\\16384_MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\16384_MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\16384_ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+        default:
+            printf("Unusual size of input data, reading MB_i.txt, MC_i.txt, ME_i.txt");
+            read_matrix_int("data\\MB_i.txt", MB, SIZE_N, SIZE_N);
+            read_matrix_int("data\\MC_i.txt", MC, SIZE_N, SIZE_N);
+            read_matrix_int("data\\ME_i.txt", ME, SIZE_N, SIZE_N);
+            read_scalar_int("data\\d_i.txt", &d);
+            break;
+    }
 
     // Device pointers
     int* d_MA = NULL;
@@ -225,49 +317,49 @@ void gpu_mode() {
     err = cudaMalloc((void **)&d_MA, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for MA on device\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMalloc((void **)&d_MB, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for MB on device\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMalloc((void **)&d_MC, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for MC on device\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMalloc((void **)&d_ME, matrix_size);
     if (err != cudaSuccess) {
         printf("Error allocating memory for ME on device\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMalloc((void **)&d_d, sizeof(int));
     if (err != cudaSuccess) {
         printf("Error allocating memory for d on device\n");
-        return;
+        exit(EXIT_FAILURE);
     }
 
     // Copy data to the device
     err = cudaMemcpyAsync(d_MB, MB, matrix_size, cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         printf("Error copying MB to the device.");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMemcpyAsync(d_MC, MC, matrix_size, cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         printf("Error copying MC to the device.");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMemcpyAsync(d_ME, ME, matrix_size, cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         printf("Error copying ME to the device.");
-        return;
+        exit(EXIT_FAILURE);
     }
     err = cudaMemcpyAsync(d_d, &d, sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         printf("Error copying d to the device.");
-        return;
+        exit(EXIT_FAILURE);
     }
     
     // Prepare for kernel launches
@@ -278,7 +370,7 @@ void gpu_mode() {
     err = cudaEventRecord(start);
     if (err != cudaSuccess) {
         printf("Error recording start event.");
-        return;
+        exit(EXIT_FAILURE);
     }
 
     i_gpu_matrix_multiply_matrix_acc<<<grid_dims, block_dims>>>(d_MB, d_MC, d_MA, SIZE_N);
@@ -287,19 +379,19 @@ void gpu_mode() {
     err = cudaEventRecord(stop);
     if (err != cudaSuccess) {
         printf("Error recording stop event.");
-        return;
+        exit(EXIT_FAILURE);
     }
     cudaEventSynchronize(stop);
     if (err != cudaSuccess) {
         printf("Error syncronizing.");
-        return;
+        exit(EXIT_FAILURE);
     }
 
     // Copy result to the host
     err = cudaMemcpyAsync(MA, d_MA, matrix_size, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess) {
         printf("Error copying result to host.");
-        return;
+        exit(EXIT_FAILURE);
     }
 
     // Free device memory
@@ -313,7 +405,7 @@ void gpu_mode() {
     err = cudaEventElapsedTime(&elapsed_time, start, stop);
     if (err != cudaSuccess) {
         printf("Error evaluating elapsed time.");
-        return;
+        exit(EXIT_FAILURE);
     }
     printf("Elapsed time: %.5f milliseconds\n", elapsed_time);
     

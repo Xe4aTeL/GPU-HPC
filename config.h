@@ -1,8 +1,5 @@
 #pragma once
 
-// Data Size
-#define SIZE_N 8192
-
 // CUDA Configuration
 // Block (x * y * z) = number of threads
 #define BLOCK_X 16

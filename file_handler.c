@@ -6,7 +6,7 @@ void read_matrix_int(const char* filename, int* matrix, int N, int M) {
 
     if (file == NULL)  {
         printf("Error opening file: %s\n", filename);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < N; i++) {
@@ -14,7 +14,7 @@ void read_matrix_int(const char* filename, int* matrix, int N, int M) {
             if (fscanf(file, "%d ", &matrix[i * N + j]) != 1) {
                 printf("Error reading data from file: %s\n", filename);
                 fclose(file);
-                return;
+                exit(EXIT_FAILURE);
             }
         }
     }
@@ -28,13 +28,13 @@ void read_scalar_int(const char* filename, int* scalar) {
 
     if (file == NULL) {
         printf("Error opening file: %s\n", filename);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     if (fscanf(file, "%d", scalar) != 1) {
         printf("Error reading data from file: %s\n", filename);
         fclose(file);
-        return;
+        exit(EXIT_FAILURE);
     }
     
     fclose(file);
@@ -46,7 +46,7 @@ void write_matrix_int(const char* filename, int* metrix, int N, int M) {
 
     if (file == NULL)  {
         printf("Error opening file: %s\n", filename);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < N; i++) {
@@ -65,7 +65,7 @@ void read_matrix_float(const char* filename, float* matrix, int N, int M) {
 
     if (file == NULL) {
         printf("Error opening file: %s\n", filename);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < N; i++)
@@ -73,7 +73,7 @@ void read_matrix_float(const char* filename, float* matrix, int N, int M) {
             if (fscanf(file, "%f ", &matrix[i * N + j]) != 1) {
                 printf("Error reading data from file: %s\n", filename);
                 fclose(file);
-                return;
+                exit(EXIT_FAILURE);
             }
 
     fclose(file);
@@ -85,14 +85,14 @@ void read_vector_float(const char* filename, float* vector, int N) {
 
     if (file == NULL) {
         printf("Error opening file: %s\n", filename);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < N; i++)
         if (fscanf(file, "%f ", &vector[i]) != 1) {
             printf("Error reading data from file: %s\n", filename);
             fclose(file);
-            return;
+            exit(EXIT_FAILURE);
         }
 
     fclose(file);
@@ -104,7 +104,7 @@ void write_vector_float(const char* filename, float* vector, int N) {
 
     if (file == NULL) {
         printf("Error opening file: %s\n", filename);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < N; i++)

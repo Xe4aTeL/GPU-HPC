@@ -38,6 +38,7 @@ __global__ void f_gpu_matrix_multiply_matrix_acc(float* matrix1, float* matrix2,
     {
         float sum = 0;
         
+        #pragma unroll
         for (int k = 0; k < N; k++)
         {
             sum += matrix1[idx * N + k] * matrix2[k * N + idy];
@@ -53,6 +54,8 @@ __global__ void f_gpu_matrix_multiply_vector_acc(float* matrix, float* vector, f
     if (idx < N)
     {
         float sum = 0;
+
+        #pragma unroll
         for (int k = 0; k < N; k++)
         {
             sum += matrix[idx * N + k] * vector[k];

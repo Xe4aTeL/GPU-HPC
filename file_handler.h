@@ -2,6 +2,7 @@
 #define FILE_HANDLER_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 #if __cplusplus
