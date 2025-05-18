@@ -202,8 +202,7 @@ void cpu_mode(int SIZE_N) {
 
     // Print and save result
     print_matrix_result(MA, SIZE_N);
-    switch(SIZE_N)
-    {
+    switch(SIZE_N) {
         case 256:
             write_matrix_int("result\\256_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
             break;
@@ -409,7 +408,7 @@ void gpu_mode(int SIZE_N) {
     
     // Prepare for kernel launches
     dim3 block_dims(BLOCK_X, BLOCK_Y, BLOCK_Z);
-    dim3 grid_dims(GRID_X(BLOCK_X), GRID_Y(BLOCK_Y), GRID_Z);
+    dim3 grid_dims(GRID_X(SIZE_N), GRID_Y(SIZE_N), GRID_Z);
 
     // Launch kernels
     err = cudaEventRecord(start);
@@ -454,8 +453,7 @@ void gpu_mode(int SIZE_N) {
 
     // Print and save result
     print_matrix_result(MA, SIZE_N);
-    switch(SIZE_N)
-    {
+    switch(SIZE_N) {
         case 256:
             write_matrix_int("result\\256_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
             break;

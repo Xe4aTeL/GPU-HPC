@@ -232,8 +232,7 @@ void cpu_mode(int SIZE_N) {
 
     // Print and save result
     print_vector_result(A, SIZE_N);
-    switch(SIZE_N)
-    {
+    switch(SIZE_N) {
         case 256:
             write_vector_float("result\\256_cpu_prg2.txt", A, SIZE_N);
             break;
@@ -435,7 +434,7 @@ void gpu_mode(int SIZE_N) {
 
     // Prepare for kernel launches
     dim3 block_dims(BLOCK_X, BLOCK_Y, BLOCK_Z);
-    dim3 grid_dims(GRID_X(BLOCK_X), GRID_Y(BLOCK_Y), GRID_Z);
+    dim3 grid_dims(GRID_X(SIZE_N), GRID_Y(SIZE_N), GRID_Z);
     // For Efficient vector addition
     int vec_block_dims = 32;
     int vec_grid_dims = (SIZE_N + vec_block_dims - 1) / vec_block_dims;
@@ -507,7 +506,7 @@ void gpu_mode(int SIZE_N) {
         cublasHandle_t h_cublas;
         cublasStatus_t cublas_status;
         float alpha = 1.0f;
-        float beta = 1.0f;
+        float beta = 0.0f;
 
         // Init cuBLAS
         cublas_status = cublasCreate_v2(&h_cublas);
@@ -556,13 +555,15 @@ void gpu_mode(int SIZE_N) {
         }
 
         // Perform calculation
-        // MX = alpha (MC * MD) + beta * MX, S for single-precision
-        cublas_status = cublasSgemm_v2(h_cublas, CUBLAS_OP_N, CUBLAS_OP_N, SIZE_N, SIZE_N, SIZE_N, &alpha, d_MC, SIZE_N, d_MD, SIZE_N, &beta, d_MX, SIZE_N);
+        // MX = alpha * (op(MC) * op(MD)) + beta * MX, S for single-precision
+        // Since matrices were copied with cuBLAS, we need to transpose them before performing multiplication,
+        // beacause cuBLAS copies with column-major order, but the input is row-major
+        cublas_status = cublasSgemm_v2(h_cublas, CUBLAS_OP_T, CUBLAS_OP_T, SIZE_N, SIZE_N, SIZE_N, &alpha, d_MC, SIZE_N, d_MD, SIZE_N, &beta, d_MX, SIZE_N);
         if (cublas_status != CUBLAS_STATUS_SUCCESS) {
             printf("Error performing MX = MC * MD.");
             exit(EXIT_FAILURE);
         }
-        // A = alpha (MX * E) + beta * A, S for single-precision
+        // A = alpha * (op(MX) * E) + beta * A, S for single-precision
         cublas_status = cublasSgemv_v2(h_cublas, CUBLAS_OP_N, SIZE_N, SIZE_N, &alpha, d_MX, SIZE_N, d_E, 1, &beta, d_A, 1);
         if (cublas_status != CUBLAS_STATUS_SUCCESS) {
             printf("Error performing A = MX * E.");
@@ -614,33 +615,63 @@ void gpu_mode(int SIZE_N) {
     
     // Print and save result
     print_vector_result(A, SIZE_N);
-    switch(SIZE_N)
-    {
-        case 256:
-            write_vector_float("result\\256_gpu_prg2.txt", A, SIZE_N);
-            break;
-        case 512:
-            write_vector_float("result\\512_gpu_prg2.txt", A, SIZE_N);
-            break;
-        case 1024:
-            write_vector_float("result\\1024_gpu_prg2.txt", A, SIZE_N);
-            break;
-        case 2048:
-            write_vector_float("result\\2048_gpu_prg2.txt", A, SIZE_N);
-            break;
-        case 4096:
-            write_vector_float("result\\4096_gpu_prg2.txt", A, SIZE_N);
-            break;
-        case 8192:
-            write_vector_float("result\\8192_gpu_prg2.txt", A, SIZE_N);
-            break;
-        case 16384:
-            write_vector_float("result\\16384_gpu_prg2.txt", A, SIZE_N);
-            break;
-        default:
-            write_vector_float("result\\result_gpu_prg2.txt", A, SIZE_N);
-            break;
+    if (CUBLAS_ENABLE == 0) {
+        switch(SIZE_N) {
+            case 256:
+                write_vector_float("result\\256_gpu_prg2.txt", A, SIZE_N);
+                break;
+            case 512:
+                write_vector_float("result\\512_gpu_prg2.txt", A, SIZE_N);
+                break;
+            case 1024:
+                write_vector_float("result\\1024_gpu_prg2.txt", A, SIZE_N);
+                break;
+            case 2048:
+                write_vector_float("result\\2048_gpu_prg2.txt", A, SIZE_N);
+                break;
+            case 4096:
+                write_vector_float("result\\4096_gpu_prg2.txt", A, SIZE_N);
+                break;
+            case 8192:
+                write_vector_float("result\\8192_gpu_prg2.txt", A, SIZE_N);
+                break;
+            case 16384:
+                write_vector_float("result\\16384_gpu_prg2.txt", A, SIZE_N);
+                break;
+            default:
+                write_vector_float("result\\result_gpu_prg2.txt", A, SIZE_N);
+                break;
+        }
     }
+    else {
+        switch(SIZE_N) {
+            case 256:
+                write_vector_float("result\\256_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+            case 512:
+                write_vector_float("result\\512_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+            case 1024:
+                write_vector_float("result\\1024_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+            case 2048:
+                write_vector_float("result\\2048_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+            case 4096:
+                write_vector_float("result\\4096_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+            case 8192:
+                write_vector_float("result\\8192_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+            case 16384:
+                write_vector_float("result\\16384_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+            default:
+                write_vector_float("result\\result_gpu_prg2_cublas.txt", A, SIZE_N);
+                break;
+        }
+    }
+
 
     // Calculate elapsed time
     float elapsed_time;
