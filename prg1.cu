@@ -46,6 +46,18 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Check if SIZE_N is valid
+    if (SIZE_N < 1) {
+        printf("Error: SIZE_N must be positive\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Create timer for measuring execution time
+    struct timespec start, end; 
+
+    // Start the timer
+    timespec_get(&start, TIME_UTC);
+
     // CPU mode memory allocation
     if (GPU_ENABLE == 0)
         cpu_mode(SIZE_N);
@@ -53,6 +65,13 @@ int main(int argc, char* argv[]) {
     // GPU mode memory allocation
     if (GPU_ENABLE == 1)
         gpu_mode(SIZE_N);
+
+    // Stop the timer
+    timespec_get(&end, TIME_UTC);
+
+    // Show elapsed time
+    double elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    printf("Elapsed time executing: %.5f milliseconds\n", elapsed_time * 1000);
 
     printf("Done\n");
     exit(EXIT_SUCCESS);
@@ -70,7 +89,7 @@ void print_matrix_result(int* matrix, int N) {
         return;
     }
 
-    printf("Result: ");
+    printf("Result: \n");
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++)
             printf("%d ", matrix[i * N + j]);
@@ -163,7 +182,7 @@ void cpu_mode(int SIZE_N) {
             read_scalar_int("data\\d_i.txt", &d);
             break;
         default:
-            printf("Unusual size of input data, reading MB_i.txt, MC_i.txt, ME_i.txt");
+            printf("Unusual size of input data, reading MB_i.txt, MC_i.txt, ME_i.txt, d_i.txt\n");
             read_matrix_int("data\\MB_i.txt", MB, SIZE_N, SIZE_N);
             read_matrix_int("data\\MC_i.txt", MC, SIZE_N, SIZE_N);
             read_matrix_int("data\\ME_i.txt", ME, SIZE_N, SIZE_N);
@@ -181,13 +200,39 @@ void cpu_mode(int SIZE_N) {
     // End timer
     timespec_get(&end, TIME_UTC);
 
-    // Show elapsed time
-    double elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("Elapsed time: %.5f milliseconds\n", elapsed_time * 1000);
-
     // Print and save result
     print_matrix_result(MA, SIZE_N);
-    write_matrix_int("result\\result_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+    switch(SIZE_N)
+    {
+        case 256:
+            write_matrix_int("result\\256_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 512:
+            write_matrix_int("result\\512_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 1024:
+            write_matrix_int("result\\1024_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 2048:
+            write_matrix_int("result\\2048_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 4096:
+            write_matrix_int("result\\4096_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 8192:
+            write_matrix_int("result\\8192_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 16384:
+            write_matrix_int("result\\16384_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        default:
+            write_matrix_int("result\\result_cpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+    }
+
+    // Show elapsed time
+    double elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    printf("Elapsed time calculating: %.5f milliseconds\n", elapsed_time * 1000);
 
     // Free malloc
     free(MA);
@@ -202,7 +247,7 @@ void gpu_mode(int SIZE_N) {
         printf("Error: THREADS_PER_BLOCK exceeds 1024\n");
         return;
     }
-    if (GRID_Y > 65535 || BLOCKS_PER_GRID > 2147483647) // "2 ^ 31 - 1" or "(1 << 31) - 1"
+    if (GRID_Y(BLOCK_Y) > 65535 || BLOCKS_PER_GRID(SIZE_N) > 2147483647) // "2 ^ 31 - 1" or "(1 << 31) - 1"
     {
         printf("Error: BLOCK_Y exceeds 65535 or BLOCKS_PER_GRID exceeds 2 ^ 31 - 1\n");
         return;
@@ -298,7 +343,7 @@ void gpu_mode(int SIZE_N) {
             read_scalar_int("data\\d_i.txt", &d);
             break;
         default:
-            printf("Unusual size of input data, reading MB_i.txt, MC_i.txt, ME_i.txt");
+            printf("Unusual size of input data, reading MB_i.txt, MC_i.txt, ME_i.txt, d_i.txt\n");
             read_matrix_int("data\\MB_i.txt", MB, SIZE_N, SIZE_N);
             read_matrix_int("data\\MC_i.txt", MC, SIZE_N, SIZE_N);
             read_matrix_int("data\\ME_i.txt", ME, SIZE_N, SIZE_N);
@@ -364,7 +409,7 @@ void gpu_mode(int SIZE_N) {
     
     // Prepare for kernel launches
     dim3 block_dims(BLOCK_X, BLOCK_Y, BLOCK_Z);
-    dim3 grid_dims(GRID_X, GRID_Y, GRID_Z);
+    dim3 grid_dims(GRID_X(BLOCK_X), GRID_Y(BLOCK_Y), GRID_Z);
 
     // Launch kernels
     err = cudaEventRecord(start);
@@ -394,11 +439,48 @@ void gpu_mode(int SIZE_N) {
         exit(EXIT_FAILURE);
     }
 
+    // Sync the device
+    cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        printf("Error syncronizing.");
+        exit(EXIT_FAILURE);
+    }
+
     // Free device memory
     cudaFree(d_MA);
     cudaFree(d_MB);
     cudaFree(d_MC);
     cudaFree(d_ME);
+
+    // Print and save result
+    print_matrix_result(MA, SIZE_N);
+    switch(SIZE_N)
+    {
+        case 256:
+            write_matrix_int("result\\256_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 512:
+            write_matrix_int("result\\512_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 1024:
+            write_matrix_int("result\\1024_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 2048:
+            write_matrix_int("result\\2048_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 4096:
+            write_matrix_int("result\\4096_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 8192:
+            write_matrix_int("result\\8192_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        case 16384:
+            write_matrix_int("result\\16384_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+        default:
+            write_matrix_int("result\\result_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+            break;
+    }
 
     // Show elapsed time
     float elapsed_time;
@@ -407,11 +489,7 @@ void gpu_mode(int SIZE_N) {
         printf("Error evaluating elapsed time.");
         exit(EXIT_FAILURE);
     }
-    printf("Elapsed time: %.5f milliseconds\n", elapsed_time);
-    
-    // Print and save result
-    print_matrix_result(MA, SIZE_N);
-    write_matrix_int("result\\result_gpu_prg1.txt", MA, SIZE_N, SIZE_N);
+    printf("Elapsed time calculating: %.5f milliseconds\n", elapsed_time);
 
     // Free host memory
     cudaFreeHost(MA);
