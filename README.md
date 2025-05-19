@@ -38,22 +38,25 @@ make -j3 debug
 ---
 ## Launch
 
+Insert data in a folder next to a program. For SIZE_N 256, 512, 1024, 2048, 4096, 8192 and 16384 name files as
+\<SIZE_N\>\_\<Variable\>\_\<Data type\>.txt, for other sizes: \<Variable\>\_\<Data type\>.txt
+
 ### CPU Mode
 ```
-make launch_cpu
+prg1.exe 0 SIZE_N
 ```
 or
 ```
-make launch_cpu_debug
+prg2.exe 0 SIZE_N
 ```
 
 ### GPU Mode
 ```
-make launch_gpu
+prg1.exe 1 SIZE_N
 ```
 or
 ```
-make launch_gpu_debug
+prg2.exe 1 SIZE_N
 ```
 
 ---
