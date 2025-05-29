@@ -4,20 +4,18 @@
 void read_matrix_int(const char* filename, int* matrix, int N, int M) {
     FILE* file = fopen(filename, "r");
 
-    if (file == NULL)  {
+    if (file == NULL) {
         printf("Error opening file: %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < M; j++)
             if (fscanf(file, "%d ", &matrix[i * N + j]) != 1) {
                 printf("Error reading data from file: %s\n", filename);
                 fclose(file);
                 exit(EXIT_FAILURE);
             }
-        }
-    }
 
     fclose(file);
     printf("Data read from file: %s\n", filename);
@@ -49,11 +47,9 @@ void write_matrix_int(const char* filename, int* metrix, int N, int M) {
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++)
         for (int j = 0; j < M; j++)
             fprintf(file, "%d ", metrix[i * N + j]);
-        fprintf(file, "\n");
-    }
 
     fclose(file);
     printf("Data written to file: %s\n", filename);

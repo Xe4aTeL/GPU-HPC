@@ -672,7 +672,6 @@ void gpu_mode(int SIZE_N) {
         }
     }
 
-
     // Calculate elapsed time
     float elapsed_time;
     err = cudaEventElapsedTime(&elapsed_time, start, stop);
